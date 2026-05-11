@@ -1,8 +1,15 @@
+/**
+ * Main Application Logic
+ * Este archivo controla el flujo de la aplicación, el renderizado de la UI 
+ * y la coordinación entre las llamadas bancarias (proxy) y el almacenamiento local.
+ */
+
 const API_BASE_URL = "http://localhost/TAMALBITS-main/proxy.php";
 const PERSON_ID = "240420241040";
 
-let currentBalance = 0;
+let currentBalance = 0; // Estado global para el saldo del usuario
 
+// Mapeo de imágenes locales para los productos del catálogo
 const imagenesDefault = {
   "orejas de pollo": "img/pollo.jpg",
   "cafe americano": "img/cafe.jpg",
@@ -10,6 +17,9 @@ const imagenesDefault = {
   "refresco de cola": "img/refresco.jpg"
 };
 
+/**
+ * Inicialización de la aplicación al cargar el documento
+ */
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("productGrid")) {
     renderProducts();
@@ -20,18 +30,17 @@ document.addEventListener("DOMContentLoaded", () => {
   loadUserData();
 });
 
+/**
+ * Carga el saldo bancario (vía Proxy) y los puntos Tamalbits (vía API Local)
+ */
 async function loadUserData() {
   try {
+    // Petición a la API bancaria externa a través del proxy local
     const response = await fetch(`${API_BASE_URL}?path=api/account/${PERSON_ID}`);
     if (!response.ok) throw new Error("No se pudo obtener el saldo");
 
     const data = await response.json();
-    currentBalance =
-      data.balance !== undefined
-        ? data.balance
-        : data.saldo !== undefined
-          ? data.saldo
-          : data;
+    currentBalance = data.balance !== undefined ? data.balance : (data.saldo !== undefined ? data.saldo : data);
 
     const balanceElement = document.getElementById("userBalance");
     if (balanceElement) {
@@ -46,6 +55,7 @@ async function loadUserData() {
   }
 
   try {
+    // Obtención de puntos Tamalbits desde el backend propio
     const usuario = await obtenerUsuario();
     const tamalbitsElement = document.getElementById("userTamalbits");
     if (tamalbitsElement && usuario) {
@@ -56,18 +66,19 @@ async function loadUserData() {
   }
 }
 
+/**
+ * Genera dinámicamente las tarjetas de productos en el DOM
+ */
 async function renderProducts() {
   const grid = document.getElementById("productGrid");
   grid.innerHTML = "<p>Cargando productos...</p>";
 
   try {
     const products = await obtenerProductos();
-    console.log("Productos:", products.map(p => p.nombre));
     grid.innerHTML = "";
 
     products.forEach((p) => {
       const imgSrc = imagenesDefault[p.nombre.toLowerCase()] || "https://via.placeholder.com/400";
-
       const tamalbitsBadge = p.otorga_tamalbits
         ? `<span class="badge bg-warning text-dark mb-2"><i class="bi bi-star-fill"></i> Otorga Tamalbits</span>`
         : "";
@@ -98,6 +109,13 @@ async function renderProducts() {
   }
 }
 
+/**
+ * Orquestador del proceso de compra:
+ * 1. Verifica saldo.
+ * 2. Deduce dinero de la API bancaria (vía Proxy).
+ * 3. Registra la transacción en la DB local (vía API Local).
+ * 4. Actualiza la UI.
+ */
 async function comprarProducto(id_producto) {
   let productos;
   try {
@@ -115,23 +133,19 @@ async function comprarProducto(id_producto) {
     return;
   }
 
-  const confirmacion = confirm(
-    `¿Deseas comprar ${producto.nombre} por $${parseFloat(producto.precio).toFixed(2)}?`
-  );
+  const confirmacion = confirm(`¿Deseas comprar ${producto.nombre} por $${parseFloat(producto.precio).toFixed(2)}?`);
   if (!confirmacion) return;
 
   try {
-    const response = await fetch(
-      `${API_BASE_URL}?path=api/account/${PERSON_ID}/deduct`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: producto.precio,
-          reason: `Compra de ${producto.nombre}`,
-        }),
-      }
-    );
+    // Paso 1: Deducción bancaria externa
+    const response = await fetch(`${API_BASE_URL}?path=api/account/${PERSON_ID}/deduct`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: producto.precio,
+        reason: `Compra de ${producto.nombre}`,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -139,11 +153,13 @@ async function comprarProducto(id_producto) {
       return;
     }
 
+    // Paso 2: Cálculo de recompensas
     let tamalbitsGanados = 0;
     if (producto.otorga_tamalbits) {
       tamalbitsGanados = Math.floor(producto.precio / 10);
     }
 
+    // Paso 3: Registro de gasto en persistencia local
     await guardarGasto(
       producto.id_producto,
       producto.precio,
@@ -152,11 +168,12 @@ async function comprarProducto(id_producto) {
       tamalbitsGanados
     );
 
+    // Paso 4: Actualización de datos en pantalla
     await loadUserData();
 
     showToast(
       `¡Compra exitosa! Has adquirido ${producto.nombre}.` +
-        (tamalbitsGanados > 0 ? ` ¡Ganaste ${tamalbitsGanados} Tamalbits!` : "")
+      (tamalbitsGanados > 0 ? ` ¡Ganaste ${tamalbitsGanados} Tamalbits!` : "")
     );
   } catch (error) {
     console.error("Error al conectar con la API:", error);
@@ -164,6 +181,9 @@ async function comprarProducto(id_producto) {
   }
 }
 
+/**
+ * Renderiza el historial de transacciones en la página de historial
+ */
 async function renderHistory() {
   const container = document.getElementById("historyContainer");
   if (!container) return;
@@ -183,8 +203,7 @@ async function renderHistory() {
     gastos.forEach((g) => {
       const fecha = new Date(g.fecha).toLocaleString("es-ES");
       const imgSrc = imagenesDefault[g.producto_nombre?.toLowerCase()] || "https://via.placeholder.com/50";
-      const tbBadge =
-        g.tamalbits_ganados > 0
+      const tbBadge = g.tamalbits_ganados > 0
           ? `<span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> +${g.tamalbits_ganados} TB</span>`
           : "";
 
@@ -213,10 +232,13 @@ async function renderHistory() {
   }
 }
 
+/**
+ * Muestra una notificación visual temporal (Bootstrap Toast)
+ */
 function showToast(message) {
   const toastEl = document.getElementById("notificationToast");
   if (!toastEl) return;
   document.getElementById("toastMessage").textContent = message;
   const toast = new bootstrap.Toast(toastEl);
   toast.show();
-}
+}

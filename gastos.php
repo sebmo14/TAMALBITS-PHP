@@ -1,13 +1,23 @@
 <?php
+/**
+ * API Endpoint: Gestión de Gastos e Historial
+ * Centraliza la lógica para registrar nuevas compras (gastos) y consultar el historial de transacciones.
+ */
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
+
 require 'db.php';
 
+// Determina la operación a realizar basada en el parámetro 'accion'
 $accion = $_GET['accion'] ?? '';
 
 if ($accion === 'guardar') {
+    /**
+     * Sub-acción: Guardar una nueva compra
+     * Recibe los datos en el cuerpo de la petición (POST JSON) y los inserta en la DB.
+     */
     $body = json_decode(file_get_contents('php://input'), true);
 
     $usuario_id = $body['usuario_id'];
@@ -17,11 +27,12 @@ if ($accion === 'guardar') {
     $descripcion = $body['descripcion'] ?? '';
     $tamalbits_ganados = $body['tamalbits_ganados'] ?? 0;
 
+    // Inserción del registro de gasto
     $stmt = $conn->prepare('INSERT INTO gastos (usuario_id, producto_id, monto, categoria, descripcion, tamalbits_ganados) VALUES (?, ?, ?, ?, ?, ?)');
     $stmt->bind_param('iidssi', $usuario_id, $producto_id, $monto, $categoria, $descripcion, $tamalbits_ganados);
 
     if ($stmt->execute()) {
-        // Actualizar tamalbits del usuario si ganó
+        // Lógica de Recompensa: Si el producto otorga Tamalbits, actualiza el perfil del usuario
         if ($tamalbits_ganados > 0) {
             $upd = $conn->prepare('UPDATE usuarios SET tamalbits = tamalbits + ? WHERE id_usuario = ?');
             $upd->bind_param('ii', $tamalbits_ganados, $usuario_id);
@@ -34,6 +45,10 @@ if ($accion === 'guardar') {
     }
 
 } elseif ($accion === 'historial') {
+    /**
+     * Sub-acción: Consultar historial
+     * Realiza un JOIN entre la tabla de gastos y productos para mostrar información detallada.
+     */
     $usuario_id = $_GET['usuario_id'] ?? 0;
 
     $stmt = $conn->prepare('
@@ -59,4 +74,4 @@ if ($accion === 'guardar') {
 }
 
 $conn->close();
-?>
+?>

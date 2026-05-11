@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- 
+        Capa de Presentación: Vista de la Tienda
+        Esta página sirve como interfaz principal para que los usuarios vean productos y realicen compras.
+    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tamalbits - Tienda</title>
-    <!-- Bootstrap 5 CSS -->
+    <!-- Framework de Estilos: Bootstrap 5 para un diseño responsivo y componentes pre-diseñados -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
+    <!-- Iconografía oficial de Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
+    <!-- Tipografía personalizada desde Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
+    <!-- Estilos personalizados específicos del proyecto -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-    <!-- Navbar -->
+    <!-- Navegación: Proporciona acceso rápido a la tienda y al historial -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.html">
@@ -38,7 +42,7 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- User Panel -->
+        <!-- Panel de Usuario: Muestra el Saldo Bancario y los Puntos Tamalbits -->
         <div class="user-panel">
             <div class="d-flex align-items-center gap-4">
                 <div class="balance-box">
@@ -58,9 +62,8 @@
 
         <h2 class="mb-4 fw-bold">Productos Disponibles</h2>
 
-        <!-- Product Grid -->
+        <!-- Contenedor Dinámico: Aquí se inyectan las tarjetas de productos vía JavaScript -->
         <div class="row g-4" id="productGrid">
-            <!-- Los productos se cargarán dinámicamente aquí -->
             <div class="col-12 text-center py-5" id="loadingProducts">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Cargando...</span>
@@ -69,7 +72,7 @@
         </div>
     </div>
 
-    <!-- Toast Container para notificaciones -->
+    <!-- Componente Toast: Notificaciones emergentes no intrusivas para feedback de usuario -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="notificationToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -81,11 +84,10 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle -->
+    <!-- Scripts de la aplicación -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Database Mock JS -->
-    <script src="js/database.js"></script>
-    <!-- Main App JS -->
-    <script src="js/app.js"></script>
+    <script src="js/database.js"></script> <!-- Funciones de abstracción de datos -->
+    <script src="js/app.js"></script>      <!-- Lógica principal de la aplicación -->
 </body>
 </html>
+
