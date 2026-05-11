@@ -4,7 +4,7 @@
  * y la coordinación entre las llamadas bancarias (proxy) y el almacenamiento local.
  */
 
-const API_BASE_URL = "http://localhost/TAMALBITS-main/proxy.php";
+const API_BASE_URL = "proxy.php";
 const PERSON_ID = "240420241040";
 
 let currentBalance = 0; // Estado global para el saldo del usuario

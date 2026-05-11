@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS gastos (
 INSERT IGNORE INTO usuarios (id_usuario, nombre, tamalbits) VALUES (240420241040, 'Usuario Prueba', 0);
 
 INSERT IGNORE INTO productos (id_producto, nombre, descripcion, precio, categoria, otorga_tamalbits) VALUES
-(1, 'Orejas de pollo', 'Deliciosas orejas de pollo fritas', 50.00, 'Alimentos', TRUE),
+(1, 'Orejas de pollo', 'Deliciosas orejas de pollo fritas', 1000.00, 'Alimentos', TRUE),
 (2, 'Cafe Americano', 'Cafe americano recien hecho', 30.00, 'Bebidas', FALSE),
 (3, 'Torta de jamon', 'Torta tradicional de jamon', 45.00, 'Alimentos', FALSE),
 (4, 'Refresco de cola', 'Bebida carbonatada fria', 20.00, 'Bebidas', FALSE);

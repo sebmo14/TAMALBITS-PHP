@@ -5,7 +5,7 @@
  */
 
 const USUARIO_ID = 240420241040; // Identificador único del usuario (Simulado)
-const BASE_URL = 'http://localhost/TAMALBITS-main'; // URL base del backend local
+const BASE_URL = '.'; // URL base del backend local (ruta relativa)
 
 /**
  * Obtiene la lista de productos desde productos.php
